@@ -162,6 +162,7 @@ services:
       - BUCKET=${BUCKET}
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8088/realms/user-service
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=http://keycloak:8080/realms/user-service/protocol/openid-connect/certs
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks: [ social_media_net ]
 
   ai-service:
