@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,6 +90,23 @@ public class EmbeddingServiceImpl implements EmbeddingService{
         else {
             log.info("No changes detected in vectors. ");
         }
+    }
+
+    @Override
+    public List<String> findSimilarContent(UUID socialAccountId, String queryText) {
+        log.info("Searching 'brain' for account {} regarding topic: '{}'", socialAccountId , queryText);
+
+        List<Double> vectorList = embeddingModel.embed(queryText);
+        double[] queryVector = vectorList.stream().mapToDouble(Double::doubleValue).toArray();
+
+        List<UserPostEmbedding> matches = embeddingRepository.findMostSimilar(socialAccountId , queryVector);
+
+        List<String> results = matches.stream()
+                .map(UserPostEmbedding::getContent)
+                .collect(Collectors.toList());
+
+        log.info("Found {} relevant post memories.",results.size());
+        return results;
     }
 
     private String generateMetadataJson(HistoricalPost post) {
