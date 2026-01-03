@@ -17,7 +17,7 @@ public class RAGController {
 
     public final EmbeddingService embeddingService;
 
-    @GetMapping("/context/{socialAccountId")
+    @GetMapping("/context/{socialAccountId}")
     public ResponseEntity<List<String>> retrieveContext(
         @PathVariable UUID socialAccountId,
                 @RequestParam String query){

@@ -18,6 +18,8 @@
         <java.version>21</java.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+        <!-- FIX: Explicitly set Lombok version compatible with Java 21 -->
+        <lombok.version>1.18.36</lombok.version>
     </properties>
 
     <dependencies>
@@ -100,7 +102,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- FIX: Upgraded to 1.0.0-M1 to support EmbeddingModel interface -->
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
@@ -143,6 +144,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                            <!-- This will now pick up 1.18.36 from properties -->
                             <version>${lombok.version}</version>
                         </path>
                         <path>
