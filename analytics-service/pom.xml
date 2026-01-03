@@ -6,7 +6,8 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.5</version>
-        <relativePath/> </parent>
+        <relativePath/>
+    </parent>
     <groupId>com.fierceadventurer</groupId>
     <artifactId>analytics-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -72,6 +73,8 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.3.0</version>
         </dependency>
+
+        <!-- SPRING AI DEPENDENCIES -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
@@ -80,10 +83,12 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
         </dependency>
+
+        <!-- JSON Processing -->
         <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-    </dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -95,10 +100,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-             <dependency>
+            <!-- FIX: Upgraded to 1.0.0-M1 to support EmbeddingModel interface -->
+            <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>
-                <version>0.8.1</version>
+                <version>1.0.0-M1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -106,7 +112,6 @@
     </dependencyManagement>
 
     <repositories>
-        <!-- Spring AI is in the Milestone repo currently -->
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
