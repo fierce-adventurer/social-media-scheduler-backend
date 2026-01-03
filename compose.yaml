@@ -144,6 +144,7 @@ services:
       - KAFKA_KEY=${KAFKA_KEY}
       - KAFKA_SECRET=${KAFKA_SECRET}
       - CLIENTS_SOCIAL_ACCOUNT_SERVICE_URL=http://social-account-service:8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks: [ social_media_net ]
 
   # --- Support Services ---
