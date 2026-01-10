@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.DayOfWeek;
 import java.util.*;
@@ -30,6 +31,9 @@ public class AnalysisJobRunner {
     private final OptimalTimeSlotRepository  optimalTimeSlotRepository;
     private final SocialAccountClient socialAccountClient;
     private final SocialMediaClientFactory clientFactory;
+    private final TransactionTemplate transactionTemplate;
+    private final EmbeddingService embeddingService;
+
 
     @Scheduled(fixedDelay = 5 , timeUnit = TimeUnit.MINUTES)
     public void findAndProcessPendingJobs() {
@@ -81,6 +85,14 @@ public class AnalysisJobRunner {
         List<OptimalTimeSlot> newTimeSlots = calculateScores(job.getSocialAccountId() , posts);
 
         saveOptimalSlots(job.getSocialAccountId() , newTimeSlots);
+
+        try{
+            log.info("Ingesting {} posts into vector Database for RAG...", posts.size());
+            embeddingService.ingestPosts(job.getSocialAccountId(), posts);
+        }
+        catch (Exception e){
+            log.error("Failed to ingest vector for RAG: {}" , e.getMessage());
+        }
     }
 
     private List<OptimalTimeSlot> calculateScores(UUID socialAccountId, List<HistoricalPost> posts){

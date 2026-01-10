@@ -16,4 +16,6 @@ public class GenerateRequestDto {
     private String tone;
 
     private String platform;
+
+    private UUID socialAccountId;
 }
