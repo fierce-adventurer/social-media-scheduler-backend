@@ -22,7 +22,7 @@ public class UserPostEmbedding {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "social_ccount_id", nullable = false)
+    @Column(name = "social_account_id", nullable = false)
     private UUID socialAccountId;
 
     @Column(nullable = false , columnDefinition = "TEXT")
