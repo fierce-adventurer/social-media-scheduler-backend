@@ -19,8 +19,8 @@ public class AiController {
 
     @PostMapping("/generate")
     public ResponseEntity<GenerateResponseDto> generateContent(
-            @Valid @RequestBody GenerateRequestDto requestDto){
-        GenerateResponseDto response = aiGenerateService.generateContent(requestDto);
+            @Valid @RequestBody GenerateRequestDto request){
+        GenerateResponseDto response = aiGenerateService.generateContent(request);
         return ResponseEntity.ok(response);
     }
 

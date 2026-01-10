@@ -60,7 +60,7 @@ public class AiGenerationServiceImpl implements AiGenerateService {
             try{
                 log.info("fetching RAG context for account: {}", request.getSocialAccountId());
                 pastPosts = analyticsClient.getRelevantContext(request.getSocialAccountId() , request.getPrompt());
-                log.info("Retrived {] relevant past post for context.", pastPosts.size());
+                log.info("Retrived {} relevant past post for context.", pastPosts.size());
             }
             catch (Exception e){
                 log.info("Failed to retrieve context from Analytics Service. Proceeding with generic generation. Error: {}", e.getMessage());
