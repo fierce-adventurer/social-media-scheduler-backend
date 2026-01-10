@@ -2,6 +2,7 @@ package com.fierceadventurer.aiservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fierceadventurer.aiservice.client.AnalyticsClient;
 import com.fierceadventurer.aiservice.client.MediaServiceClient;
 import com.fierceadventurer.aiservice.dto.GenerateRequestDto;
 import com.fierceadventurer.aiservice.dto.GenerateResponseDto;
@@ -32,7 +33,7 @@ public class AiGenerationServiceImpl implements AiGenerateService {
 
     private final ChatClient chatClient;
     private final MediaServiceClient mediaServiceClient;
-
+    private final AnalyticsClient analyticsClient;
     private final KafkaTemplate<String , String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
@@ -54,24 +55,25 @@ public class AiGenerationServiceImpl implements AiGenerateService {
             }
         }
 
+        List<String> pastPosts = new ArrayList<>();
+        if(request.getSocialAccountId() != null){
+            try{
+                log.info("fetching RAG context for account: {}", request.getSocialAccountId());
+                pastPosts = analyticsClient.getRelevantContext(request.getSocialAccountId() , request.getPrompt());
+                log.info("Retrived {] relevant past post for context.", pastPosts.size());
+            }
+            catch (Exception e){
+                log.info("Failed to retrieve context from Analytics Service. Proceeding with generic generation. Error: {}", e.getMessage());
+            }
+        }
+
+        String systemPrompt = buildSystemPrompt(request.getTone() , pastPosts);
         UserMessage userMessage = UserMessage.builder()
                 .text(request.getPrompt())
                 .media(mediaList)
                 .build();
 
-        String systemPrompt = """
-                You are an expert social media manager.
-                Generate exactly 2-3 distinct, engaging options for a post based on user's prompt and attached media.
 
-                RULES:
-                - Do NOT use conversational filler (e.g. "Here is your post").
-                - Use short paragraphs and emojis.
-                - Separate each option with exactly three hashes: ###
-                - Do NOT include my introductory or concluding text.
-                - Start immediately with first option.
-                - If an image is provided, describe it briefly in the context of the post.
-                - Use appropriate hashtags if relevant to the prompt.
-                """;
 
         try{
             ChatResponse response = chatClient.prompt()
@@ -97,6 +99,43 @@ public class AiGenerationServiceImpl implements AiGenerateService {
 
         }
 
+    }
+
+    private String buildSystemPrompt(String tone, List<String> pastPosts) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("You are an expert social media manager .\n");
+        sb.append("Generate exactly 2-3 distinct, engaging options for a post based on user's prompt and attached media.\n\n");
+        if(tone != null && !tone.isEmpty()){
+            sb.append("TONE: ").append(tone).append("\n");
+        }
+
+        if(pastPosts != null && !pastPosts.isEmpty()){
+            sb.append("\n### AUTHOR'S VOICE & STYLE INSTRUCTIONS ###\n");
+            sb.append("Analyze the following examples of the user's previous successful posts. \n");
+            sb.append("Mimic their sentence structure , emoji usage , formatting style, and vocabulary exactly. \n");
+            sb.append("Do NOT mention that your are mimicking them. Just write in their persona \n\n");
+
+            sb.append("--- START EXAMPLES ---\n");
+            for(String post : pastPosts){
+                String cleanPost = post.length() > 500 ? post.substring(0 , 500) + "..." : post;
+                sb.append("Example: ").append(cleanPost).append("\n\n");
+            }
+            sb.append(" --- END EXAMPLES ---\n");
+        }
+        else {
+            sb.append("\nStyle: Use a professional yet engaging style suitable for LinkedIn.\n");
+        }
+
+        sb.append("\nRULES:\n");
+        sb.append("- Do NOT use conversational filler (e.g. \"Here is your post\").\n");
+        sb.append("- Use short paragraphs and emojis.\n");
+        sb.append("- Separate each option with exactly three hashes: ###\n");
+        sb.append("- Do NOT include my introductory or concluding text.\n");
+        sb.append("- Start immediately with first option.\n");
+        sb.append("- If an image is provided, describe it briefly in the context of the post.\n");
+        sb.append("- Use appropriate hashtags if relevant to the prompt.\n");
+
+        return sb.toString();
     }
 
     private void publishToKafka(GenerateRequestDto request , String generateContent){
